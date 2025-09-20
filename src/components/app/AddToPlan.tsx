@@ -1,18 +1,18 @@
 'use client';
 
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Trash2, LoaderCircle } from 'lucide-react';
-import { refineTasksAction } from '@/lib/actions';
 import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { DailyPlan } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
+import { refineTasksAction } from '@/lib/actions';
 
 const formSchema = z.object({
   tasks: z.array(z.object({ value: z.string().min(3, 'Task must be at least 3 characters.') })),
@@ -58,30 +58,15 @@ export default function AddToPlan({ currentPlan }: AddToPlanProps) {
       return;
     }
     
-    // This is a temporary solution to bypass AI refinement when adding tasks.
-    // Ideally, the review flow would be adapted to handle adding to an existing plan.
-    const newFinalizedTasks = newTasks.map(task => ({
-        id: crypto.randomUUID(),
-        text: task,
-        originalTask: task,
-    }));
+    const allTasks = [...currentPlan.tasks.map(t => t.originalTask), ...newTasks];
 
-    const updatedPlan: DailyPlan = {
-        ...currentPlan,
-        tasks: [...currentPlan.tasks, ...newFinalizedTasks],
-    };
-
-    startTransition(() => {
+    startTransition(async () => {
         try {
-            localStorage.setItem(`dailyPlan_${user?.uid}`, JSON.stringify(updatedPlan));
-            toast({
-                title: 'Tasks Added!',
-                description: 'Your new tasks have been added to your daily plan.',
-            });
-            router.push('/dashboard');
+            await refineTasksAction(allTasks, currentPlan.tasks);
         } catch(e) {
              toast({
                 title: 'Failed to add tasks',
+                description: e instanceof Error ? e.message : 'An unknown error occurred.',
                 variant: 'destructive',
             });
         }
@@ -126,10 +111,10 @@ export default function AddToPlan({ currentPlan }: AddToPlanProps) {
             {isPending ? (
               <>
                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                Adding to Plan...
+                Updating Plan...
               </>
             ) : (
-              'Add to My Plan'
+              'Update My Plan'
             )}
           </Button>
         </div>

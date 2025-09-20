@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { type RawAIData, type RefinedTask, type MicroTask } from '@/lib/types';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type RawAIData, type RefinedTask, type MicroTask, type FinalizedTask } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '@/components/ui/carousel';
@@ -19,11 +19,14 @@ interface SuggestionReviewProps {
 
 export default function SuggestionReview({ initialData }: SuggestionReviewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+
+  const [existingTasks, setExistingTasks] = useState<FinalizedTask[]>([]);
 
   const [refinedTasks, setRefinedTasks] = useState<RefinedTask[]>(() => {
     return Object.entries(initialData.refinedTasks).map(([originalTask, microTaskStrings]) => ({
@@ -40,6 +43,13 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const getPlanKey = () => `dailyPlan_${user?.uid}`;
 
   useEffect(() => {
+    const existing = searchParams.get('existing');
+    if (existing) {
+      setExistingTasks(JSON.parse(decodeURIComponent(existing)));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (!api) return;
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
@@ -50,8 +60,14 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find((mt) => mt.id === microTaskId);
     if (microTask) {
-      if (microTask.status !== 'pending' && status !== 'approved' && microTask.status !== 'edited') return;
-      microTask.status = status;
+       if (microTask.status === status) {
+        // If clicking the same status again, revert to pending, unless it's edited
+        if (status !== 'edited') {
+          microTask.status = 'pending';
+        }
+      } else {
+        microTask.status = status;
+      }
       setRefinedTasks(newRefinedTasks);
     }
   };
@@ -69,11 +85,16 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find(mt => mt.id === microTaskId);
     if (microTask) {
-      if (microTask.status !== 'pending') return;
+      if (microTask.status !== 'pending' && microTask.status !== 'approved') return;
       microTask.status = 'edited';
       setRefinedTasks(newRefinedTasks);
     }
   }
+  
+  const saveEditedTask = (taskIndex: number, microTaskId: string) => {
+    handleStatusChange(taskIndex, microTaskId, 'approved');
+  }
+
 
   const allReviewed = refinedTasks.every((rt) => rt.microTasks.every((mt) => mt.status !== 'pending'));
 
@@ -88,15 +109,17 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         return;
     }
   
-    const finalPlan = refinedTasks.flatMap(rt => 
+    const newFinalizedTasks = refinedTasks.flatMap(rt => 
       rt.microTasks
-        .filter(mt => mt.status === 'approved' || mt.status === 'edited')
+        .filter(mt => mt.status === 'approved')
         .map(mt => ({
           id: mt.id,
           text: mt.text,
           originalTask: rt.originalTask,
         }))
     );
+
+    const finalPlan = [...existingTasks, ...newFinalizedTasks];
     
     if (finalPlan.length === 0) {
         toast({
@@ -120,11 +143,23 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     router.push('/dashboard');
   };
 
+  const getStatusButtonClass = (taskStatus: MicroTask['status'], buttonStatus: MicroTask['status']) => {
+    if (taskStatus === 'pending') return 'text-gray-500';
+    if (taskStatus === buttonStatus) {
+      switch(buttonStatus) {
+        case 'approved': return 'text-green-500 bg-green-100 dark:bg-green-900';
+        case 'rejected': return 'text-red-500 bg-red-100 dark:bg-red-900';
+        default: return 'text-gray-500';
+      }
+    }
+    return 'text-gray-400 dark:text-gray-600';
+  };
+
   const statusColors: Record<MicroTask['status'], string> = {
     pending: 'bg-secondary text-secondary-foreground',
-    approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    edited: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    approved: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-500/50',
+    rejected: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-500/50',
+    edited: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-500/50',
   };
 
   return (
@@ -139,7 +174,6 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       )}
 
       <Carousel setApi={setApi} className="w-full" opts={{
-        active: refinedTasks.length > 1,
         watchDrag: refinedTasks.length > 1,
       }}>
         <CarouselContent>
@@ -152,7 +186,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
                 <CardContent className="flex flex-col gap-3">
                   {task.microTasks.map((microTask) => (
                     <div key={microTask.id} className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
-                      <Badge className={`capitalize ${statusColors[microTask.status]}`}>{microTask.status}</Badge>
+                      <Badge variant="outline" className={`capitalize ${statusColors[microTask.status]}`}>{microTask.status}</Badge>
                       <div className="flex-grow">
                         {microTask.status === 'edited' ? (
                           <Input value={microTask.text} onChange={e => handleTextChange(taskIndex, microTask.id, e.target.value)} />
@@ -162,19 +196,19 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
                       </div>
                       <div className="flex gap-1">
                         {microTask.status === 'edited' ? (
-                            <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')}>
+                            <Button size="icon" variant="ghost" onClick={() => saveEditedTask(taskIndex, microTask.id)}>
                                 <Save className="w-5 h-5 text-blue-500" />
                             </Button>
                         ) : (
                             <>
-                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')} disabled={microTask.status !== 'pending'}>
-                                    <ThumbsUp className="w-5 h-5 text-green-500" />
+                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')} className={getStatusButtonClass(microTask.status, 'approved')}>
+                                    <ThumbsUp className="w-5 h-5" />
                                 </Button>
-                                <Button size="icon" variant="ghost" onClick={() => startEditing(taskIndex, microTask.id)} disabled={microTask.status !== 'pending'}>
-                                    <Pencil className="w-5 h-5 text-gray-500" />
+                                <Button size="icon" variant="ghost" onClick={() => startEditing(taskIndex, microTask.id)} disabled={microTask.status === 'rejected'}>
+                                    <Pencil className={`w-5 h-5 ${microTask.status === 'rejected' ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500'}`} />
                                 </Button>
-                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'rejected')} disabled={microTask.status !== 'pending'}>
-                                    <ThumbsDown className="w-5 h-5 text-red-500" />
+                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'rejected')} className={getStatusButtonClass(microTask.status, 'rejected')}>
+                                    <ThumbsDown className="w-5 h-5" />
                                 </Button>
                             </>
                         )}

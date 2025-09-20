@@ -44,7 +44,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
+      <Header withNav={true} />
       <main className="flex-1 flex items-center justify-center p-4">
         {canAddMore ? (
           <Card className="w-full max-w-2xl shadow-lg">

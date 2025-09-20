@@ -2,11 +2,11 @@ import { Suspense } from 'react';
 import SuggestionReview from '@/components/app/SuggestionReview';
 import { Header } from '@/components/app/Header';
 import { LoaderCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
-function ReviewPage({ searchParams }: { searchParams: { data?: string } }) {
+function ReviewPage({ searchParams }: { searchParams: { data?: string, existing?: string } }) {
   const data = searchParams.data;
 
   if (!data) {
@@ -32,13 +32,13 @@ function ReviewPage({ searchParams }: { searchParams: { data?: string } }) {
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Could not read suggestion data. It might be corrupted. Please try again.
-        </AlertDescription>
+        </AlerTDescription>
       </Alert>
     );
   }
 }
 
-export default function Page({ searchParams }: { searchParams: { data?: string } }) {
+export default function Page({ searchParams }: { searchParams: { data?: string, existing?: string } }) {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -46,9 +46,10 @@ export default function Page({ searchParams }: { searchParams: { data?: string }
         <Card className="w-full max-w-4xl shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold font-headline">Review Your Plan</CardTitle>
-            <p className="text-muted-foreground pt-2">
-              The AI has created micro-tasks for your goals. Approve, edit, or reject them. <br /> You can finalize your plan even with no tasks. Use swipe or arrow keys to review.
-            </p>
+            <CardDescription className="text-muted-foreground pt-2 max-w-2xl mx-auto">
+              The AI has created micro-tasks for your goals. You can approve, edit, or reject them. 
+              You can finalize your plan even with no tasks. Use swipe or arrow keys to review.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div className="flex justify-center items-center h-64"><LoaderCircle className="animate-spin h-8 w-8 text-primary" /></div>}>

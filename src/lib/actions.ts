@@ -3,26 +3,37 @@
 import { refineTasks } from '@/ai/flows/refine-tasks-with-gemini';
 import { provideTargetedSuggestions } from '@/ai/flows/provide-targeted-suggestions';
 import { redirect } from 'next/navigation';
-import type { CompletedTask, MissedTask } from './types';
+import type { CompletedTask, MissedTask, FinalizedTask } from './types';
 
-export async function refineTasksAction(tasks: string[]) {
+export async function refineTasksAction(tasks: string[], existingTasks?: FinalizedTask[]) {
   if (!tasks || tasks.length === 0) {
     throw new Error('No tasks provided.');
   }
 
+  const tasksToRefine = existingTasks 
+    ? tasks.filter(t => !existingTasks.some(et => et.originalTask === t))
+    : tasks;
+
+  if (tasksToRefine.length === 0) {
+    redirect('/dashboard');
+  }
+
   let result;
   try {
-    result = await refineTasks({ tasks });
+    result = await refineTasks({ tasks: tasksToRefine });
   } catch (error) {
     console.error('Error refining tasks:', error);
-    if (error instanceof Error) {
-      throw new Error(`Failed to get suggestions from AI: ${error.message}`);
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+        throw error;
     }
-    throw new Error('Failed to get suggestions from AI due to an unknown error.');
+    throw new Error(error instanceof Error ? `Failed to get suggestions from AI: ${error.message}` : 'Failed to get suggestions from AI due to an unknown error.');
   }
   
-  const dataStr = encodeURIComponent(JSON.stringify(result));
-  redirect(`/review?data=${dataStr}`);
+  let url = `/review?data=${encodeURIComponent(JSON.stringify(result))}`;
+  if (existingTasks && existingTasks.length > 0) {
+    url += `&existing=${encodeURIComponent(JSON.stringify(existingTasks))}`;
+  }
+  redirect(url);
 }
 
 export async function getTargetedSuggestionsAction(completedTasks: CompletedTask[], missedTasks: MissedTask[]) {
