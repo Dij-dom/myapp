@@ -62,6 +62,8 @@ export default function DashboardView() {
     return acc;
   }, {} as Record<string, typeof plan.tasks>);
 
+  const canAddMore = Object.keys(tasksByOriginal).length < 5;
+
   return (
     <div className="space-y-8">
         <div className="text-center">
@@ -94,6 +96,12 @@ export default function DashboardView() {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Start a New Day
             </Button>
+            {canAddMore && (
+                <Button variant="outline" onClick={() => router.push('/')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add More Tasks
+                </Button>
+            )}
             <Button onClick={() => router.push('/daily-review')} className="bg-accent hover:bg-accent/90">
                 <CalendarCheck className="mr-2 h-4 w-4" />
                 Proceed to Daily Review
