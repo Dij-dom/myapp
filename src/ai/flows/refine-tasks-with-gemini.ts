@@ -36,9 +36,9 @@ const refineTasksPrompt = ai.definePrompt({
 
 Refinement rules:
 1. If a task has spelling or grammar mistakes → correct it.
-2. If a task is too broad or vague → break it down into 2–5 smaller tasks that are specific, measurable, achievable, relevant, and time-bound (SMART).
+2. If a task is too broad or vague → break it down into 2-3 smaller, more generic but actionable tasks. Focus on adding structure like time or duration, rather than very specific actions.
 3. Each refined task must be a valid replacement option for the original task, not a random suggestion.
-4. If the task is already clear and actionable, just return it as-is.
+4. If the task is already clear and actionable (e.g. "Go to the gym for 1 hour"), just return it as-is.
 5. If more information is needed to refine a task (e.g., “Study” with no subject), include a clarifying question inside that task’s array AND set clarificationNeeded = true.
 6. Otherwise, clarificationNeeded = false.
 
@@ -73,9 +73,9 @@ Expected output:
 
 {
   "refinedTasks": {
-    "Go to gym": ["Go to the gym at 6:00 AM for a 30-minute workout", "Complete 3 sets of push-ups and squats", "Walk on the treadmill for 15 minutes"],
-    "Read book": ["Read 10 pages of a book before bed"],
-    "Wake up early": ["Wake up at 5:30 AM", "Set alarm for 5:15 AM to prepare"]
+    "Go to gym": ["Go to the gym for 45 minutes", "Go to the gym in the morning"],
+    "Read book": ["Read a book for 20 minutes before bed", "Finish one chapter of my book"],
+    "Wake up early": ["Wake up at 6:00 AM", "Set an alarm for 5:45 AM"]
   },
   "clarificationNeeded": false
 }
