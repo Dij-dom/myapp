@@ -47,7 +47,7 @@ export default function Page({ searchParams }: { searchParams: { data?: string }
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold font-headline">Review Your Plan</CardTitle>
             <p className="text-muted-foreground pt-2">
-              The AI has created micro-tasks for your goals. Approve the ones you like, or reject the ones you don't. <br /> Use swipe or arrow keys to review each task.
+              The AI has created micro-tasks for your goals. Approve, edit, or reject them. <br /> You can finalize your plan even with no tasks. Use swipe or arrow keys to review.
             </p>
           </CardHeader>
           <CardContent>

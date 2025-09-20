@@ -50,7 +50,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find((mt) => mt.id === microTaskId);
     if (microTask) {
-      if (microTask.status !== 'pending') return;
+      if (microTask.status !== 'pending' && status !== 'approved' && microTask.status !== 'edited') return;
       microTask.status = status;
       setRefinedTasks(newRefinedTasks);
     }
@@ -100,9 +100,14 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     
     if (finalPlan.length === 0) {
         toast({
-            title: "No micro-tasks approved",
-            description: "You can create a plan with no tasks, but it's more effective to approve at least one!",
+            title: "Plan Finalized with No Tasks",
+            description: "You can always create a new plan later!",
             variant: "default"
+        });
+    } else {
+        toast({
+            title: 'Plan Finalized!',
+            description: 'Your daily plan has been saved.',
         });
     }
 
@@ -112,10 +117,6 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     }
 
     localStorage.setItem(getPlanKey(), JSON.stringify(dailyPlan));
-    toast({
-      title: 'Plan Finalized!',
-      description: 'Your daily plan has been saved.',
-    });
     router.push('/dashboard');
   };
 
