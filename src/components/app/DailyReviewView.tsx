@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { LoaderCircle, Wand2, Lightbulb, ListTodo, PlusCircle } from 'lucide-radix';
+import { LoaderCircle, Wand2, Lightbulb, ListTodo, PlusCircle } from 'lucide-react';
 import { getTargetedSuggestionsAction } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from '@/components/ui/alert-dialog';
