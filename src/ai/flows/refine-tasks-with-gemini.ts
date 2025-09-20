@@ -32,7 +32,7 @@ export async function refineTasks(input: RefineTasksInput): Promise<RefineTasksO
 const refineTasksPrompt = ai.definePrompt({
   name: 'refineTasksPrompt',
   input: {schema: RefineTasksInputSchema},
-  output: {schema: RefineTasksOutputSchema},
+  output: {schema: RefineTasksOutputSchema, format: 'json'},
   prompt: `You are a task refinement expert. Your job is to take a list of high-level tasks and break them down into smaller, actionable micro-tasks.
 
 Here are the tasks:
