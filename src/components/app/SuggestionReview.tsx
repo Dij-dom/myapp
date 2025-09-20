@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { type RawAIData, type RefinedTask, type MicroTask, type FinalizedTask } from '@/lib/types';
+import { type RawAIData, type RefinedTask, type MicroTask, type FinalizedTask, type DailyPlan } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '@/components/ui/carousel';
@@ -25,7 +25,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, setPlan } = useAuth();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -45,7 +45,6 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     }));
   });
   
-  const getPlanKey = () => `dailyPlan_${user?.uid}`;
 
   useEffect(() => {
     const existing = searchParams.get('existing');
@@ -105,7 +104,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
 
   const allReviewed = refinedTasks.every((rt) => rt.microTasks.every((mt) => mt.status !== 'pending' && mt.status !== 'edited'));
 
-  const finalizePlan = () => {
+  const finalizePlan = async () => {
     if (!user) {
         toast({
             title: "Authentication Error",
@@ -126,9 +125,9 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         }))
     );
 
-    const finalPlan = [...existingTasks, ...newFinalizedTasks];
+    const finalPlanTasks = [...existingTasks, ...newFinalizedTasks];
     
-    if (finalPlan.length === 0) {
+    if (finalPlanTasks.length === 0) {
         toast({
             title: "Plan Finalized with No Tasks",
             description: "You can always create a new plan later!",
@@ -141,12 +140,12 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         });
     }
 
-    const dailyPlan = {
+    const dailyPlan: DailyPlan = {
       date: new Date().toISOString(),
-      tasks: finalPlan,
+      tasks: finalPlanTasks,
     }
-
-    localStorage.setItem(getPlanKey(), JSON.stringify(dailyPlan));
+    
+    await setPlan(dailyPlan);
     router.push('/dashboard');
   };
 

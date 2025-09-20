@@ -1,33 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { DailyPlan } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, ListTodo, PlusCircle, CalendarCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardView() {
-  const [plan, setPlan] = useState<DailyPlan | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, plan, loading, setPlan } = useAuth();
   
-  const getPlanKey = () => `dailyPlan_${user?.uid}`;
-
-  useEffect(() => {
-    if (!user) return;
-    const savedPlan = localStorage.getItem(getPlanKey());
-    if (savedPlan) {
-      setPlan(JSON.parse(savedPlan));
-    }
-    setLoading(false);
-  }, [user]);
-
   const startNewDay = () => {
     if(!user) return;
-    localStorage.removeItem(getPlanKey());
+    setPlan(null);
     router.push('/');
   };
   

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { DailyPlan, CompletedTask, MissedTask } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,8 +15,6 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { useAuth } from '@/hooks/use-auth';
 
 export default function DailyReviewView() {
-  const [plan, setPlan] = useState<DailyPlan | null>(null);
-  const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -25,19 +23,8 @@ export default function DailyReviewView() {
 
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, plan, loading } = useAuth();
   
-  const getPlanKey = () => `dailyPlan_${user?.uid}`;
-
-  useEffect(() => {
-    if (!user) return;
-    const savedPlan = localStorage.getItem(getPlanKey());
-    if (savedPlan) {
-      setPlan(JSON.parse(savedPlan));
-    }
-    setLoading(false);
-  }, [user]);
-
   const handleReasonChange = (taskId: string, reason: string) => {
     setReasons(prev => ({ ...prev, [taskId]: reason }));
   };
