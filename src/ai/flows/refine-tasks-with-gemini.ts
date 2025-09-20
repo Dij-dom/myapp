@@ -91,13 +91,18 @@ const refineTasksFlow = ai.defineFlow(
   async input => {
     const response = await refineTasksPrompt(input);
     const text = response.text;
-    const json = JSON.parse(text);
+    
+    // Extract JSON from the text, which might be wrapped in markdown
+    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```|({[\s\S]*})/);
+    const jsonString = jsonMatch ? (jsonMatch[1] || jsonMatch[2]) : text;
+
+    const json = JSON.parse(jsonString);
 
     const parsed = RefineTasksOutputSchema.parse(json);
 
     return {
       ...parsed,
-      rawJson: text,
+      rawJson: jsonString,
     };
   }
 );
