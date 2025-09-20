@@ -30,6 +30,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [isFinalized, setIsFinalized] = useState(false);
 
   const [existingTasks, setExistingTasks] = useState<FinalizedTask[]>([]);
   
@@ -140,9 +141,9 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       
       toast({
           title: 'Plan Finalized!',
-          description: 'Your daily plan has been saved. Redirecting to dashboard.',
+          description: 'Your daily plan has been saved.',
       });
-      router.push('/dashboard');
+      setIsFinalized(true);
 
     } catch (error) {
         toast({
@@ -248,14 +249,17 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       )}
       {allReviewed && (
         <div className="mt-6 flex justify-center items-center gap-4">
-           <Button variant="outline" onClick={() => router.push('/dashboard')}>
+          {isFinalized ? (
+            <Button variant="outline" onClick={() => router.push('/dashboard')}>
               <Home className="mr-2 h-4 w-4" />
               View Dashboard
             </Button>
-          <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90" disabled={authLoading || isFinalizing}>
-            {isFinalizing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-            {isFinalizing ? 'Finalizing...' : 'Finalize My Plan'}
-          </Button>
+          ) : (
+            <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90" disabled={authLoading || isFinalizing}>
+              {isFinalizing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+              {isFinalizing ? 'Finalizing...' : 'Finalize My Plan'}
+            </Button>
+          )}
         </div>
       )}
     </div>
