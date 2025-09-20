@@ -44,9 +44,12 @@ Also include a boolean named clarificationNeeded, and set it to true if any of t
 
 Example:
 {
-  "Learn a new language": ["Sign up for a Duolingo course (15 minutes)", "Practice Spanish vocabulary for 20 minutes", "Watch a short Spanish-language video on YouTube", "What kind of language do you want to learn?"],
-  "Get in shape": ["Go for a 30-minute jog in the park", "Do a 15-minute bodyweight workout", "Prepare a healthy lunch"],
-  "Read more books": ["Read 20 pages of 'The Hitchhiker's Guide to the Galaxy'", "Write a book review", "What genres are you interested in?"]
+  "refinedTasks": {
+    "Learn a new language": ["Sign up for a Duolingo course (15 minutes)", "Practice Spanish vocabulary for 20 minutes", "Watch a short Spanish-language video on YouTube", "What kind of language do you want to learn?"],
+    "Get in shape": ["Go for a 30-minute jog in the park", "Do a 15-minute bodyweight workout", "Prepare a healthy lunch"],
+    "Read more books": ["Read 20 pages of 'The Hitchhiker's Guide to the Galaxy'", "Write a book review", "What genres are you interested in?"]
+  },
+  "clarificationNeeded": true
 }
 
 Ensure that the JSON is valid and can be parsed without errors.
