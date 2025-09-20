@@ -107,49 +107,59 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
 
   const finalizePlan = async () => {
     setIsFinalizing(true);
-    if (!user) {
+    try {
+      if (!user) {
+          toast({
+              title: "Authentication Error",
+              description: "You must be logged in to save a plan. Redirecting to login.",
+              variant: "destructive"
+          });
+          router.push('/login');
+          return;
+      }
+    
+      const newFinalizedTasks = refinedTasks.flatMap(rt => 
+        rt.microTasks
+          .filter(mt => mt.status === 'approved')
+          .map(mt => ({
+            id: mt.id,
+            text: mt.text,
+            originalTask: rt.originalTask,
+          }))
+      );
+
+      const finalPlanTasks = [...existingTasks, ...newFinalizedTasks];
+      
+      const dailyPlan: DailyPlan = {
+        date: new Date().toISOString(),
+        tasks: finalPlanTasks,
+      }
+      
+      await setPlan(dailyPlan);
+      
+      if (finalPlanTasks.length === 0) {
+          toast({
+              title: "Plan Finalized with No Tasks",
+              description: "You can always create a new plan later!",
+              variant: "default"
+          });
+      } else {
+          toast({
+              title: 'Plan Finalized!',
+              description: 'Your daily plan has been saved.',
+          });
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
         toast({
-            title: "Authentication Error",
-            description: "You must be logged in to save a plan. Redirecting to login.",
+            title: "Failed to Finalize Plan",
+            description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
             variant: "destructive"
         });
-        router.push('/login');
-        return;
+    } finally {
+        setIsFinalizing(false);
     }
-  
-    const newFinalizedTasks = refinedTasks.flatMap(rt => 
-      rt.microTasks
-        .filter(mt => mt.status === 'approved')
-        .map(mt => ({
-          id: mt.id,
-          text: mt.text,
-          originalTask: rt.originalTask,
-        }))
-    );
-
-    const finalPlanTasks = [...existingTasks, ...newFinalizedTasks];
-    
-    const dailyPlan: DailyPlan = {
-      date: new Date().toISOString(),
-      tasks: finalPlanTasks,
-    }
-    
-    await setPlan(dailyPlan);
-    
-    if (finalPlanTasks.length === 0) {
-        toast({
-            title: "Plan Finalized with No Tasks",
-            description: "You can always create a new plan later!",
-            variant: "default"
-        });
-    } else {
-        toast({
-            title: 'Plan Finalized!',
-            description: 'Your daily plan has been saved.',
-        });
-    }
-
-    router.push('/dashboard');
   };
 
   const getStatusButtonClass = (taskStatus: MicroTask['status'], buttonStatus: MicroTask['status']) => {
