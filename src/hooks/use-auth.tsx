@@ -15,6 +15,8 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   createUserWithEmailAndPassword,
+  setPersistence,
+  inMemoryPersistence,
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -44,17 +46,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        const userPlan = await getPlan(user.uid);
-        setPlanState(userPlan);
-      } else {
-        setPlanState(null);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    const initializeAuth = async () => {
+      await setPersistence(auth, inMemoryPersistence);
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        setUser(user);
+        if (user) {
+          const userPlan = await getPlan(user.uid);
+          setPlanState(userPlan);
+        } else {
+          setPlanState(null);
+        }
+        setLoading(false);
+      });
+      return unsubscribe;
+    };
+
+    const unsubscribePromise = initializeAuth();
+
+    return () => {
+      unsubscribePromise.then(unsubscribe => unsubscribe && unsubscribe());
+    };
   }, []);
 
   const setPlan = useCallback(async (newPlan: DailyPlan | null) => {
