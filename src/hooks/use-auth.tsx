@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await firebaseSignOut(auth);
   };
 
-  const publicRoutes = ['/login', '/'];
+  const publicRoutes = ['/login'];
 
   useEffect(() => {
     if (!loading && !user && !publicRoutes.includes(pathname)) {
