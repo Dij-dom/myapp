@@ -6,7 +6,7 @@ import { type RawAIData, type RefinedTask, type MicroTask, type FinalizedTask, t
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '@/components/ui/carousel';
-import { Check, ThumbsDown, ThumbsUp, Pencil, Save, AlertCircle } from 'lucide-react';
+import { Check, ThumbsDown, ThumbsUp, Pencil, Save, AlertCircle, LoaderCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -25,10 +25,11 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const { user, setPlan } = useAuth();
+  const { user, setPlan, loading: authLoading } = useAuth();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   const [existingTasks, setExistingTasks] = useState<FinalizedTask[]>([]);
   const clarificationNeeded = searchParams.get('clarification') === 'true';
@@ -105,10 +106,11 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const allReviewed = refinedTasks.every((rt) => rt.microTasks.every((mt) => mt.status !== 'pending' && mt.status !== 'edited'));
 
   const finalizePlan = async () => {
+    setIsFinalizing(true);
     if (!user) {
         toast({
             title: "Authentication Error",
-            description: "You must be logged in to save a plan.",
+            description: "You must be logged in to save a plan. Redirecting to login.",
             variant: "destructive"
         });
         router.push('/login');
@@ -127,6 +129,13 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
 
     const finalPlanTasks = [...existingTasks, ...newFinalizedTasks];
     
+    const dailyPlan: DailyPlan = {
+      date: new Date().toISOString(),
+      tasks: finalPlanTasks,
+    }
+    
+    await setPlan(dailyPlan);
+    
     if (finalPlanTasks.length === 0) {
         toast({
             title: "Plan Finalized with No Tasks",
@@ -140,12 +149,6 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         });
     }
 
-    const dailyPlan: DailyPlan = {
-      date: new Date().toISOString(),
-      tasks: finalPlanTasks,
-    }
-    
-    await setPlan(dailyPlan);
     router.push('/dashboard');
   };
 
@@ -242,9 +245,9 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       )}
       {allReviewed && (
         <div className="mt-6 flex justify-center">
-          <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90">
-            <Check className="mr-2 h-4 w-4" />
-            Finalize My Plan
+          <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90" disabled={authLoading || isFinalizing}>
+            {isFinalizing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+            {isFinalizing ? 'Finalizing...' : 'Finalize My Plan'}
           </Button>
         </div>
       )}

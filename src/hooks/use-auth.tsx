@@ -78,11 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPlanState(null);
   };
 
-  const publicRoutes = ['/login', '/'];
-  // The review page is special, it can be accessed via a server-side redirect
-  // but it still requires a user to be logged in to function. We'll handle its
-  // protection inside the `useEffect` below.
-  const isPublicPath = publicRoutes.includes(pathname);
+  const publicRoutes = ['/login'];
+  const isPublicPath = publicRoutes.includes(pathname) || pathname === '/';
+
 
   useEffect(() => {
     if (!loading && !user && !isPublicPath) {
