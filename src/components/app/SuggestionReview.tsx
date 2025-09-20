@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '../ui/alert';
+import { useAuth } from '@/hooks/use-auth';
 
 interface SuggestionReviewProps {
   initialData: RawAIData;
@@ -19,6 +20,7 @@ interface SuggestionReviewProps {
 export default function SuggestionReview({ initialData }: SuggestionReviewProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -34,6 +36,8 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       })),
     }));
   });
+  
+  const getPlanKey = () => `dailyPlan_${user?.uid}`;
 
   useEffect(() => {
     if (!api) return;
@@ -72,6 +76,16 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const allReviewed = refinedTasks.every((rt) => rt.microTasks.every((mt) => mt.status !== 'pending'));
 
   const finalizePlan = () => {
+    if (!user) {
+        toast({
+            title: "Authentication Error",
+            description: "You must be logged in to save a plan.",
+            variant: "destructive"
+        });
+        router.push('/login');
+        return;
+    }
+  
     const finalPlan = refinedTasks.flatMap(rt => 
       rt.microTasks
         .filter(mt => mt.status === 'approved' || mt.status === 'edited')
@@ -96,7 +110,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       tasks: finalPlan,
     }
 
-    localStorage.setItem('dailyPlan', JSON.stringify(dailyPlan));
+    localStorage.setItem(getPlanKey(), JSON.stringify(dailyPlan));
     toast({
       title: 'Plan Finalized!',
       description: 'Your daily plan has been saved.',

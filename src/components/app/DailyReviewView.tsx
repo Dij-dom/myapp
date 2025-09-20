@@ -12,6 +12,7 @@ import { LoaderCircle, Wand2, Lightbulb, ListTodo, PlusCircle } from 'lucide-rea
 import { getTargetedSuggestionsAction } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from '@/components/ui/alert-dialog';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function DailyReviewView() {
   const [plan, setPlan] = useState<DailyPlan | null>(null);
@@ -24,14 +25,18 @@ export default function DailyReviewView() {
 
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  const getPlanKey = () => `dailyPlan_${user?.uid}`;
 
   useEffect(() => {
-    const savedPlan = localStorage.getItem('dailyPlan');
+    if (!user) return;
+    const savedPlan = localStorage.getItem(getPlanKey());
     if (savedPlan) {
       setPlan(JSON.parse(savedPlan));
     }
     setLoading(false);
-  }, []);
+  }, [user]);
 
   const handleReasonChange = (taskId: string, reason: string) => {
     setReasons(prev => ({ ...prev, [taskId]: reason }));
