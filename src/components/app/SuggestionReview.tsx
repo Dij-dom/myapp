@@ -6,7 +6,7 @@ import { type RawAIData, type RefinedTask, type MicroTask, type FinalizedTask, t
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '@/components/ui/carousel';
-import { Check, ThumbsDown, ThumbsUp, Pencil, Save, AlertCircle, LoaderCircle } from 'lucide-react';
+import { Check, ThumbsDown, ThumbsUp, Pencil, Save, AlertCircle, LoaderCircle, Home } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -247,7 +247,11 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         </div>
       )}
       {allReviewed && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex justify-center items-center gap-4">
+           <Button variant="outline" onClick={() => router.push('/dashboard')}>
+              <Home className="mr-2 h-4 w-4" />
+              View Dashboard
+            </Button>
           <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90" disabled={authLoading || isFinalizing}>
             {isFinalizing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
             {isFinalizing ? 'Finalizing...' : 'Finalize My Plan'}
