@@ -16,8 +16,10 @@ export async function refineTasksAction(tasks: string[]) {
     redirect(`/review?data=${dataStr}`);
   } catch (error) {
     console.error('Error refining tasks:', error);
-    // In a real app, you'd want to handle this more gracefully
-    throw new Error('Failed to get suggestions from AI.');
+    if (error instanceof Error) {
+      throw new Error(`Failed to get suggestions from AI: ${error.message}`);
+    }
+    throw new Error('Failed to get suggestions from AI due to an unknown error.');
   }
 }
 
