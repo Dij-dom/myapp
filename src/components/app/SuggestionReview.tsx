@@ -32,8 +32,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   const [existingTasks, setExistingTasks] = useState<FinalizedTask[]>([]);
-  const clarificationNeeded = searchParams.get('clarification') === 'true';
-
+  
   const [refinedTasks, setRefinedTasks] = useState<RefinedTask[]>(() => {
     return Object.entries(initialData.refinedTasks).map(([originalTask, microTaskStrings]) => ({
       originalTask,
@@ -41,10 +40,12 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         id: crypto.randomUUID(),
         text,
         originalText: text,
-        status: clarificationNeeded && isClarificationNeeded(text) ? 'edited' : 'pending',
+        status: isClarificationNeeded(text) ? 'edited' : 'pending',
       })),
     }));
   });
+
+  const clarificationNeeded = refinedTasks.some(rt => rt.microTasks.some(mt => isClarificationNeeded(mt.originalText)));
   
 
   useEffect(() => {
@@ -137,20 +138,12 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       
       await setPlan(dailyPlan);
       
-      if (finalPlanTasks.length === 0) {
-          toast({
-              title: "Plan Finalized with No Tasks",
-              description: "You can always create a new plan later!",
-              variant: "default"
-          });
-      } else {
-          toast({
-              title: 'Plan Finalized!',
-              description: 'Your daily plan has been saved.',
-          });
-      }
-
+      toast({
+          title: 'Plan Finalized!',
+          description: 'Your daily plan has been saved. Redirecting to dashboard.',
+      });
       router.push('/dashboard');
+
     } catch (error) {
         toast({
             title: "Failed to Finalize Plan",
