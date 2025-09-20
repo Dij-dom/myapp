@@ -51,11 +51,25 @@ export default function TaskInputForm() {
       try {
         await refineTasksAction(tasks);
       } catch (error) {
-        toast({
-          title: 'An error occurred',
-          description: error instanceof Error ? error.message : 'Please try again later.',
-          variant: 'destructive',
-        });
+        // The action redirects, but if it throws, we catch it here.
+        // We specifically look for the toast-related "error" to display a message.
+        if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+           try {
+            const code = error.message.match(/NEXT_REDIRECT\n(.*)\n/)?.[1];
+            if (code === 'ACTION_REDIRECT') {
+              // This is a successful redirect, let it happen
+              throw error;
+            }
+           } catch(e) {
+             throw error;
+           }
+        } else {
+          toast({
+            title: 'An error occurred',
+            description: error instanceof Error ? error.message : 'Please try again later.',
+            variant: 'destructive',
+          });
+        }
       }
     });
   };

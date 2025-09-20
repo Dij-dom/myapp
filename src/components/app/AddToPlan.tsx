@@ -64,6 +64,10 @@ export default function AddToPlan({ currentPlan }: AddToPlanProps) {
         try {
             await refineTasksAction(allTasks, currentPlan.tasks);
         } catch(e) {
+             if (e instanceof Error && e.message.includes("NEXT_REDIRECT")) {
+                // Let redirect happen
+                throw e;
+             }
              toast({
                 title: 'Failed to add tasks',
                 description: e instanceof Error ? e.message : 'An unknown error occurred.',
