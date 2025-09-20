@@ -32,7 +32,6 @@ export async function refineTasks(input: RefineTasksInput): Promise<RefineTasksO
 const refineTasksPrompt = ai.definePrompt({
   name: 'refineTasksPrompt',
   input: {schema: RefineTasksInputSchema},
-  output: {schema: RefineTasksOutputSchema},
   prompt: `You are a task refinement expert. Your job is to take a list of high-level tasks and break them down into smaller, actionable micro-tasks.
 
 Here are the tasks:
@@ -52,7 +51,7 @@ Example:
   "clarificationNeeded": true
 }
 
-Ensure that the JSON is valid and can be parsed without errors.
+Ensure that the JSON is valid and can be parsed without errors. Respond only with JSON. No extra text.
 
 Output:
 `,
@@ -65,12 +64,15 @@ const refineTasksFlow = ai.defineFlow(
     outputSchema: RefineTasksOutputSchema,
   },
   async input => {
-    const {output} = await refineTasksPrompt(input);
+    const response = await refineTasksPrompt(input);
+    const text = response.text;
+    const json = JSON.parse(text);
 
-    // Add raw JSON to output for debugging purposes
+    const parsed = RefineTasksOutputSchema.parse(json);
+
     return {
-      ...output!,
-      rawJson: JSON.stringify(output),
+      ...parsed,
+      rawJson: text,
     };
   }
 );
