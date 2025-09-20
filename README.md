@@ -7,15 +7,11 @@
 
 **[Working Demo](https://drive.google.com/file/d/1_lA05XwPUOeap_OWaKjOqotJiAIKZjcN/view?usp=sharing)**
 
----
-
 ## 🚀 Netlify 
 
 **[Access the live application here](https://mellow-nasturtium-7cd661.netlify.app)**
 
 ---
-
-
 
 About MingAI
 
@@ -54,7 +50,7 @@ With reminders, progress tracking, and a conversational interface, MingAI turns 
 -   **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [ShadCN UI](https://ui.shadcn.com/)
 -   **Authentication:** [Firebase Authentication](https://firebase.google.com/docs/auth)
 -   **Database:** [Firebase Realtime Database](https://firebase.google.com/docs/database)
--   **AI Integration:** [Google AI (Gemini)](https://ai.google.dev/) via [Genkit](https://firebase.google.com/docs/genkit)
+-   **AI Integration:** [Google AI (Gemini)](https://ai.google.dev/) via [Genkit](https://firebase.google.com/docs/genkit) Used gemini-2.5-flash with fine tuned prompt and parameters(temperature set to 0.2 for better consistency)
 
 ---
 
