@@ -51,7 +51,9 @@ Example:
   "clarificationNeeded": true
 }
 
-Ensure that the JSON is valid and can be parsed without errors. Respond only with JSON. No extra text.
+Respond only with a valid JSON object.
+Do not include \`\`\`json or any extra formatting.
+Return only the raw JSON.
 
 Output:
 `,
