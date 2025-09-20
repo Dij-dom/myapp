@@ -15,8 +15,6 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   createUserWithEmailAndPassword,
-  setPersistence,
-  inMemoryPersistence,
 } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -46,26 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      await setPersistence(auth, inMemoryPersistence);
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        setUser(user);
-        if (user) {
-          const userPlan = await getPlan(user.uid);
-          setPlanState(userPlan);
-        } else {
-          setPlanState(null);
-        }
-        setLoading(false);
-      });
-      return unsubscribe;
-    };
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      if (user) {
+        const userPlan = await getPlan(user.uid);
+        setPlanState(userPlan);
+      } else {
+        setPlanState(null);
+      }
+      setLoading(false);
+    });
 
-    const unsubscribePromise = initializeAuth();
-
-    return () => {
-      unsubscribePromise.then(unsubscribe => unsubscribe && unsubscribe());
-    };
+    return () => unsubscribe();
   }, []);
 
   const setPlan = useCallback(async (newPlan: DailyPlan | null) => {
@@ -89,7 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const publicRoutes = ['/login', '/'];
-  const isPublicPath = publicRoutes.includes(pathname) || pathname.startsWith('/review');
+  // The review page is special, it can be accessed via a server-side redirect
+  // but it still requires a user to be logged in to function. We'll handle its
+  // protection inside the `useEffect` below.
+  const isPublicPath = publicRoutes.includes(pathname);
 
   useEffect(() => {
     if (!loading && !user && !isPublicPath) {
@@ -97,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [loading, user, isPublicPath, router]);
   
+  // Show a loading screen for protected routes while we verify the user.
   if (loading && !isPublicPath) {
     return <Loading />;
   }
