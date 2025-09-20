@@ -17,6 +17,10 @@ interface SuggestionReviewProps {
   initialData: RawAIData;
 }
 
+const isClarificationNeeded = (microTaskText: string) => {
+    return microTaskText.includes('?');
+}
+
 export default function SuggestionReview({ initialData }: SuggestionReviewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,6 +31,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const [count, setCount] = useState(0);
 
   const [existingTasks, setExistingTasks] = useState<FinalizedTask[]>([]);
+  const clarificationNeeded = searchParams.get('clarification') === 'true';
 
   const [refinedTasks, setRefinedTasks] = useState<RefinedTask[]>(() => {
     return Object.entries(initialData.refinedTasks).map(([originalTask, microTaskStrings]) => ({
@@ -35,7 +40,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         id: crypto.randomUUID(),
         text,
         originalText: text,
-        status: 'pending',
+        status: clarificationNeeded && isClarificationNeeded(text) ? 'edited' : 'pending',
       })),
     }));
   });
@@ -60,11 +65,8 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find((mt) => mt.id === microTaskId);
     if (microTask) {
-       if (microTask.status === status) {
-        // If clicking the same status again, revert to pending, unless it's edited
-        if (status !== 'edited') {
-          microTask.status = 'pending';
-        }
+       if (microTask.status === status && status !== 'edited') {
+        microTask.status = 'pending';
       } else {
         microTask.status = status;
       }
@@ -85,18 +87,23 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find(mt => mt.id === microTaskId);
     if (microTask) {
-      if (microTask.status !== 'pending' && microTask.status !== 'approved') return;
+      if (microTask.status === 'rejected') return;
       microTask.status = 'edited';
       setRefinedTasks(newRefinedTasks);
     }
   }
   
   const saveEditedTask = (taskIndex: number, microTaskId: string) => {
-    handleStatusChange(taskIndex, microTaskId, 'approved');
+    const newRefinedTasks = [...refinedTasks];
+    const microTask = newRefinedTasks[taskIndex].microTasks.find(mt => mt.id === microTaskId);
+    if (microTask && microTask.text !== microTask.originalText && !isClarificationNeeded(microTask.text)) {
+        microTask.status = 'approved';
+        setRefinedTasks(newRefinedTasks);
+    }
   }
 
 
-  const allReviewed = refinedTasks.every((rt) => rt.microTasks.every((mt) => mt.status !== 'pending'));
+  const allReviewed = refinedTasks.every((rt) => rt.microTasks.every((mt) => mt.status !== 'pending' && mt.status !== 'edited'));
 
   const finalizePlan = () => {
     if (!user) {
@@ -144,6 +151,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   };
 
   const getStatusButtonClass = (taskStatus: MicroTask['status'], buttonStatus: MicroTask['status']) => {
+     if (taskStatus === 'edited') return 'text-gray-400 dark:text-gray-600';
     if (taskStatus === 'pending') return 'text-gray-500';
     if (taskStatus === buttonStatus) {
       switch(buttonStatus) {
@@ -164,17 +172,18 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
 
   return (
     <div className="w-full">
-      {initialData.clarificationNeeded && (
+      {clarificationNeeded && (
         <Alert className="mb-4 bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/50 dark:border-yellow-700/50 dark:text-yellow-300">
             <AlertCircle className="h-4 w-4 !text-yellow-800 dark:!text-yellow-300" />
             <AlertDescription>
-                Some of your tasks were unclear. We've added questions to help you clarify them. You can edit the tasks below.
+                Some of your tasks were unclear. We've added questions to help you clarify them. Please edit the tasks below.
             </AlertDescription>
         </Alert>
       )}
 
       <Carousel setApi={setApi} className="w-full" opts={{
         watchDrag: refinedTasks.length > 1,
+        draggable: refinedTasks.length > 1,
       }}>
         <CarouselContent>
           {refinedTasks.map((task, taskIndex) => (
@@ -189,7 +198,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
                       <Badge variant="outline" className={`capitalize ${statusColors[microTask.status]}`}>{microTask.status}</Badge>
                       <div className="flex-grow">
                         {microTask.status === 'edited' ? (
-                          <Input value={microTask.text} onChange={e => handleTextChange(taskIndex, microTask.id, e.target.value)} />
+                          <Input value={microTask.text} onChange={e => handleTextChange(taskIndex, microTask.id, e.target.value)} onBlur={() => saveEditedTask(taskIndex, microTask.id)} />
                         ) : (
                           <p className="text-sm">{microTask.text}</p>
                         )}
@@ -201,13 +210,13 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
                             </Button>
                         ) : (
                             <>
-                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')} className={getStatusButtonClass(microTask.status, 'approved')}>
+                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')} className={getStatusButtonClass(microTask.status, 'approved')} disabled={microTask.status === 'edited'}>
                                     <ThumbsUp className="w-5 h-5" />
                                 </Button>
-                                <Button size="icon" variant="ghost" onClick={() => startEditing(taskIndex, microTask.id)} disabled={microTask.status === 'rejected'}>
+                                <Button size="icon" variant="ghost" onClick={() => startEditing(taskIndex, microTask.id)} disabled={microTask.status === 'rejected' || microTask.status === 'edited'}>
                                     <Pencil className={`w-5 h-5 ${microTask.status === 'rejected' ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500'}`} />
                                 </Button>
-                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'rejected')} className={getStatusButtonClass(microTask.status, 'rejected')}>
+                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'rejected')} className={getStatusButtonClass(microTask.status, 'rejected')} disabled={microTask.status === 'edited'}>
                                     <ThumbsDown className="w-5 h-5" />
                                 </Button>
                             </>
