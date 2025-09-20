@@ -4,15 +4,19 @@
 
 ---
 
-## 🚀 Live Demo
+## 🚀 Netlify 
 
-**[Access the live application here](YOUR_NETIFY_LINK_HERE)**
-
-*(Note: You'll need to replace `YOUR_NETIFY_LINK_HERE` with your actual deployment link.)*
+**[Access the live application here](https://mellow-nasturtium-7cd661.netlify.app)**
 
 ---
 
-## The Pitch
+## 🚀 Google Drive Link
+
+**[Working Demo](https://mellow-nasturtium-7cd661.netlify.app)**
+
+---
+
+About MingAI
 
 Staying consistent with daily goals is tough in today’s fast-paced world. MingAI is your personalized AI companion that helps you plan, track, and improve your habits every day. 
 
