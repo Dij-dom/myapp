@@ -47,7 +47,7 @@ export default function Page({ searchParams }: { searchParams: { data?: string }
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold font-headline">Review Your Plan</CardTitle>
             <p className="text-muted-foreground pt-2">
-              Here are the micro-tasks suggested by the AI. Swipe to review each task.
+              Here are the micro-tasks suggested by the AI. Use swipe or arrow keys to review each task.
             </p>
           </CardHeader>
           <CardContent>

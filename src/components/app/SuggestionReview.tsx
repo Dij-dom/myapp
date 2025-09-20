@@ -98,7 +98,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     
     if (finalPlan.length === 0) {
         toast({
-            title: "No tasks approved",
+            title: "No micro-tasks approved",
             description: "Please approve at least one micro-task to create a plan.",
             variant: "destructive"
         });
@@ -162,13 +162,13 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
                             </Button>
                         ) : (
                             <>
-                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')}>
+                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'approved')} disabled={microTask.status !== 'pending'}>
                                     <ThumbsUp className="w-5 h-5 text-green-500" />
                                 </Button>
-                                <Button size="icon" variant="ghost" onClick={() => startEditing(taskIndex, microTask.id)}>
+                                <Button size="icon" variant="ghost" onClick={() => startEditing(taskIndex, microTask.id)} disabled={microTask.status !== 'pending'}>
                                     <Pencil className="w-5 h-5 text-gray-500" />
                                 </Button>
-                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'rejected')}>
+                                <Button size="icon" variant="ghost" onClick={() => handleStatusChange(taskIndex, microTask.id, 'rejected')} disabled={microTask.status !== 'pending'}>
                                     <ThumbsDown className="w-5 h-5 text-red-500" />
                                 </Button>
                             </>
