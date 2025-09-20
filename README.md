@@ -4,20 +4,21 @@
 
 ---
 
-MingAI is an intelligent personal improvement application designed to help users turn their ambitious goals into actionable daily plans. By leveraging the power of Google's Gemini AI, MingAI bridges the gap between intention and action, making self-improvement accessible, structured, and personalized.
+## 🚀 Live Demo
 
-## The Problem
+**[Access the live application here](YOUR_NETIFY_LINK_HERE)**
 
-We all have goals we want to achieve: "get fit," "read more," "learn a new skill." However, these broad ambitions are often overwhelming. The initial motivation fades when we don't have a clear, step-by-step plan. Procrastination sets in, and our goals remain distant dreams.
+*(Note: You'll need to replace `YOUR_NETIFY_LINK_HERE` with your actual deployment link.)*
 
-## The Solution: AI-Powered Task Refinement
+---
 
-MingAI tackles this problem head-on. Instead of just being a simple to-do list, MingAI acts as your personal strategist.
+## The Pitch
 
-1.  **Input Your Goals:** Start by telling MingAI up to five high-level tasks you want to accomplish.
-2.  **AI Refinement:** Using **Google Gemini**, the app breaks down each vague goal (e.g., "Go to the gym") into concrete, actionable micro-tasks (e.g., "Go to the gym for 45 minutes," "Go to the gym in the morning").
-3.  **Review & Finalize:** You have full control. Review the AI's suggestions, approve or edit them, and build a daily plan that works for you.
-4.  **Daily Review & Targeted Feedback:** At the end of the day, review your progress. Based on your completed and missed tasks, MingAI provides new, targeted AI suggestions to help you improve and stay on track.
+Staying consistent with daily goals is tough in today’s fast-paced world. MingAI is your personalized AI companion that helps you plan, track, and improve your habits every day. 
+
+Each night, you set up to five tasks, and MingAI refines them into actionable, achievable steps using smart AI guidance. You review and approve suggestions, keeping full control, while MingAI acts as a coach that learns from your progress. 
+
+With reminders, progress tracking, and a conversational interface, MingAI turns your goals into daily wins — your buddy who keeps you accountable, motivated, and moving forward.
 
 ---
 
