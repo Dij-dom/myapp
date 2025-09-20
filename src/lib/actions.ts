@@ -10,21 +10,19 @@ export async function refineTasksAction(tasks: string[]) {
     throw new Error('No tasks provided.');
   }
 
+  let result;
   try {
-    const result = await refineTasks({ tasks });
-    const dataStr = encodeURIComponent(JSON.stringify(result));
-    redirect(`/review?data=${dataStr}`);
+    result = await refineTasks({ tasks });
   } catch (error) {
-    // This is a special case to handle Next.js redirects.
-    if (error instanceof Error && (error as any).digest?.startsWith('NEXT_REDIRECT')) {
-      throw error;
-    }
     console.error('Error refining tasks:', error);
     if (error instanceof Error) {
       throw new Error(`Failed to get suggestions from AI: ${error.message}`);
     }
     throw new Error('Failed to get suggestions from AI due to an unknown error.');
   }
+  
+  const dataStr = encodeURIComponent(JSON.stringify(result));
+  redirect(`/review?data=${dataStr}`);
 }
 
 export async function getTargetedSuggestionsAction(completedTasks: CompletedTask[], missedTasks: MissedTask[]) {
