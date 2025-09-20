@@ -150,9 +150,19 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <AuthForm />
+      <main className="flex-1 grid md:grid-cols-2">
+        <div className="hidden md:flex flex-col items-center justify-center bg-muted p-10 text-center">
+            <div className="max-w-md">
+                <h1 className="text-4xl font-bold font-headline mb-4 text-primary">MingAI</h1>
+                <p className="text-xl text-muted-foreground">
+                    “Upgrade your lifestyle with personalized guidance — your buddy who keeps you on track, every step of the way.”
+                </p>
+            </div>
+        </div>
+        <div className="flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                <AuthForm />
+            </div>
         </div>
       </main>
     </div>
