@@ -50,6 +50,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find((mt) => mt.id === microTaskId);
     if (microTask) {
+      if (microTask.status !== 'pending') return;
       microTask.status = status;
       setRefinedTasks(newRefinedTasks);
     }
@@ -68,6 +69,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     const newRefinedTasks = [...refinedTasks];
     const microTask = newRefinedTasks[taskIndex].microTasks.find(mt => mt.id === microTaskId);
     if (microTask) {
+      if (microTask.status !== 'pending') return;
       microTask.status = 'edited';
       setRefinedTasks(newRefinedTasks);
     }
@@ -99,10 +101,9 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
     if (finalPlan.length === 0) {
         toast({
             title: "No micro-tasks approved",
-            description: "Please approve at least one micro-task to create a plan.",
-            variant: "destructive"
+            description: "You can create a plan with no tasks, but it's more effective to approve at least one!",
+            variant: "default"
         });
-        return;
     }
 
     const dailyPlan = {
@@ -136,7 +137,10 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
         </Alert>
       )}
 
-      <Carousel setApi={setApi} className="w-full">
+      <Carousel setApi={setApi} className="w-full" opts={{
+        active: refinedTasks.length > 1,
+        watchDrag: refinedTasks.length > 1,
+      }}>
         <CarouselContent>
           {refinedTasks.map((task, taskIndex) => (
             <CarouselItem key={task.originalTask}>
@@ -181,12 +185,18 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex" />
-        <CarouselNext className="hidden sm:flex"/>
+        {refinedTasks.length > 1 && (
+          <>
+            <CarouselPrevious className="hidden sm:flex" />
+            <CarouselNext className="hidden sm:flex"/>
+          </>
+        )}
       </Carousel>
-      <div className="py-2 text-center text-sm text-muted-foreground">
-        Task {current} of {count}
-      </div>
+      {refinedTasks.length > 1 && (
+        <div className="py-2 text-center text-sm text-muted-foreground">
+          Task {current} of {count}
+        </div>
+      )}
       {allReviewed && (
         <div className="mt-6 flex justify-center">
           <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90">
