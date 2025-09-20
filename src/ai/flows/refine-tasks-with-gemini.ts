@@ -32,30 +32,53 @@ export async function refineTasks(input: RefineTasksInput): Promise<RefineTasksO
 const refineTasksPrompt = ai.definePrompt({
   name: 'refineTasksPrompt',
   input: {schema: RefineTasksInputSchema},
-  prompt: `You are a task refinement expert. Your job is to take a list of high-level tasks and break them down into smaller, actionable micro-tasks.
+  prompt: `You are a task refinement assistant. Your job is to take a list of user-provided tasks and make them clearer and more actionable.
 
-Here are the tasks:
+Refinement rules:
+1. If a task has spelling or grammar mistakes → correct it.
+2. If a task is too broad or vague → break it down into 2–5 smaller tasks that are specific, measurable, achievable, relevant, and time-bound (SMART).
+3. Each refined task must be a valid replacement option for the original task, not a random suggestion.
+4. If the task is already clear and actionable, just return it as-is.
+5. If more information is needed to refine a task (e.g., “Study” with no subject), include a clarifying question inside that task’s array AND set clarificationNeeded = true.
+6. Otherwise, clarificationNeeded = false.
+
+Return output strictly as JSON in the format:
+
+{
+  "refinedTasks": {
+    "<original task>": ["<refined task 1>", "<refined task 2>", "..."]
+  },
+  "clarificationNeeded": true | false
+}
+
+Rules for output:
+- Do NOT add \`\`\`json or any Markdown formatting.
+- Do NOT add explanations or extra text. Only return raw JSON.
+
+Now refine these tasks:
 {{#each tasks}}- {{{this}}}
 {{/each}}
 
-Return a JSON object where each key is the original task, and the value is an array of refined micro-tasks. Ensure that the micro-tasks are specific, measurable, achievable, relevant, and time-bound (SMART).
-Also include a boolean named clarificationNeeded, and set it to true if any of the tasks require further clarification from the user. If you set clarificationNeeded to true, the micro-tasks should include a question to ask the user.
 
-Example:
+🔹 Example Behavior
+
+Input tasks:
+
+Go to gym
+Read book
+Wake up early
+
+
+Expected output:
+
 {
   "refinedTasks": {
-    "Learn a new language": ["Sign up for a Duolingo course (15 minutes)", "Practice Spanish vocabulary for 20 minutes", "Watch a short Spanish-language video on YouTube", "What kind of language do you want to learn?"],
-    "Get in shape": ["Go for a 30-minute jog in the park", "Do a 15-minute bodyweight workout", "Prepare a healthy lunch"],
-    "Read more books": ["Read 20 pages of 'The Hitchhiker's Guide to the Galaxy'", "Write a book review", "What genres are you interested in?"]
+    "Go to gym": ["Go to the gym at 6:00 AM for a 30-minute workout", "Complete 3 sets of push-ups and squats", "Walk on the treadmill for 15 minutes"],
+    "Read book": ["Read 10 pages of a book before bed"],
+    "Wake up early": ["Wake up at 5:30 AM", "Set alarm for 5:15 AM to prepare"]
   },
-  "clarificationNeeded": true
+  "clarificationNeeded": false
 }
-
-Respond only with a valid JSON object.
-Do not include \`\`\`json or any extra formatting.
-Return only the raw JSON.
-
-Output:
 `,
 });
 
