@@ -32,7 +32,7 @@ function ReviewPage({ searchParams }: { searchParams: { data?: string, existing?
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Could not read suggestion data. It might be corrupted. Please try again.
-        </AlerTDescription>
+        </AlertDescription>
       </Alert>
     );
   }
