@@ -7,6 +7,11 @@
 
 **[Working Demo](https://drive.google.com/file/d/1_lA05XwPUOeap_OWaKjOqotJiAIKZjcN/view?usp=sharing)**
 
+## 🚀 Medium Blog
+
+**[Working Demo](https://medium.com/@dijdomv01/vibe-coding-ming-ai-a6390a8d47aa)**
+
+
 ## 🚀 Netlify 
 
 **[Access the live application here](https://mellow-nasturtium-7cd661.netlify.app)**
