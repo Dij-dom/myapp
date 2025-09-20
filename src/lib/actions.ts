@@ -15,6 +15,10 @@ export async function refineTasksAction(tasks: string[]) {
     const dataStr = encodeURIComponent(JSON.stringify(result));
     redirect(`/review?data=${dataStr}`);
   } catch (error) {
+    // This is a special case to handle Next.js redirects.
+    if (error instanceof Error && (error as any).digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
     console.error('Error refining tasks:', error);
     if (error instanceof Error) {
       throw new Error(`Failed to get suggestions from AI: ${error.message}`);
