@@ -8,11 +8,10 @@ import { useAuth } from '@/hooks/use-auth';
 
 export default function DashboardView() {
   const router = useRouter();
-  const { user, plan, loading, setPlan } = useAuth();
+  const { plan, loading, setPlan } = useAuth();
   
-  const startNewDay = () => {
-    if(!user) return;
-    setPlan(null);
+  const startNewDay = async () => {
+    await setPlan(null);
     router.push('/');
   };
   

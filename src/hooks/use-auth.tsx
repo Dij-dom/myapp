@@ -20,7 +20,7 @@ import { app } from '@/lib/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import Loading from '@/app/loading';
 import type { DailyPlan } from '@/lib/types';
-import { getPlan, savePlan } from '@/lib/database';
+import { savePlan, syncPlan } from '@/lib/database';
 
 const auth = getAuth(app);
 
@@ -44,25 +44,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeSync: (() => void) | null = null;
+  
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      
+      if (unsubscribeSync) {
+        unsubscribeSync();
+        unsubscribeSync = null;
+      }
+      
       if (user) {
-        const userPlan = await getPlan(user.uid);
-        setPlanState(userPlan);
+        unsubscribeSync = syncPlan(user.uid, (newPlan) => {
+          setPlanState(newPlan);
+        });
       } else {
         setPlanState(null);
       }
+      
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSync) {
+        unsubscribeSync();
+      }
+    };
   }, []);
 
   const setPlan = useCallback(async (newPlan: DailyPlan | null) => {
-    if (user) {
-        await savePlan(user.uid, newPlan);
-        setPlanState(newPlan);
+    if (!user) {
+      throw new Error("User must be logged in to set a plan.");
     }
+    await savePlan(user.uid, newPlan);
   }, [user]);
 
   const signIn = (email: string, pass: string) => {
@@ -75,21 +90,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    setPlanState(null);
   };
 
-  const publicRoutes = ['/login'];
-  const isPublicPath = publicRoutes.includes(pathname) || pathname === '/';
-
+  const publicRoutes = ['/login', '/'];
 
   useEffect(() => {
-    if (!loading && !user && !isPublicPath) {
+    if (!loading && !user && !publicRoutes.includes(pathname)) {
       router.push('/login');
     }
-  }, [loading, user, isPublicPath, router]);
+  }, [loading, user, pathname, router]);
   
-  // Show a loading screen for protected routes while we verify the user.
-  if (loading && !isPublicPath) {
+  if (loading && !publicRoutes.includes(pathname)) {
     return <Loading />;
   }
 

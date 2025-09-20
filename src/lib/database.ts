@@ -1,7 +1,6 @@
-'use server';
 
 import { database } from './firebase';
-import { ref, set, get, child } from 'firebase/database';
+import { ref, set, get, child, onValue, off, type Unsubscribe } from 'firebase/database';
 import type { DailyPlan } from './types';
 
 const dbRef = ref(database);
@@ -27,4 +26,14 @@ export async function getPlan(userId: string): Promise<DailyPlan | null> {
     console.error("Error getting plan from database:", error);
     return null;
   }
+}
+
+export function syncPlan(userId: string, callback: (plan: DailyPlan | null) => void): Unsubscribe {
+  const planRef = ref(database, `plans/${userId}`);
+  const unsubscribe = onValue(planRef, (snapshot) => {
+    const plan = snapshot.val() as DailyPlan | null;
+    callback(plan);
+  });
+
+  return unsubscribe;
 }
