@@ -2,6 +2,13 @@
 
 **“Upgrade your lifestyle with personalized guidance — your buddy who keeps you on track, every step of the way.”**
 
+
+## 🚀 Google Drive Link
+
+**[Working Demo](https://drive.google.com/file/d/1_lA05XwPUOeap_OWaKjOqotJiAIKZjcN/view?usp=sharing)**
+
+---
+
 ---
 
 ## 🚀 Netlify 
@@ -10,11 +17,7 @@
 
 ---
 
-## 🚀 Google Drive Link
 
-**[Working Demo](https://mellow-nasturtium-7cd661.netlify.app)**
-
----
 
 About MingAI
 
