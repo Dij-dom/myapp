@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Logo } from './Logo';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ModeToggle } from './ModeToggle';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -35,6 +36,9 @@ export function Header({ withNav = false }: { withNav?: boolean }) {
             ))}
           </nav>
         )}
+        <div className="flex flex-1 items-center justify-end">
+          <ModeToggle />
+        </div>
       </div>
     </header>
   );
