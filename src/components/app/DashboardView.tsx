@@ -66,11 +66,19 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-8">
-        <div className="text-center">
-            <h1 className="text-3xl font-bold font-headline">Today's Plan</h1>
-            <p className="text-muted-foreground">
-              Here are your goals for {new Date(plan.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
-            </p>
+        <div className="flex justify-between items-center">
+          <div className="text-left">
+              <h1 className="text-3xl font-bold font-headline">Today's Plan</h1>
+              <p className="text-muted-foreground">
+                Here are your goals for {new Date(plan.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
+              </p>
+          </div>
+          {canAddMore && (
+              <Button variant="outline" onClick={() => router.push('/')}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add More Tasks
+              </Button>
+          )}
         </div>
       
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -96,12 +104,6 @@ export default function DashboardView() {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Start a New Day
             </Button>
-            {canAddMore && (
-                <Button variant="outline" onClick={() => router.push('/')}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add More Tasks
-                </Button>
-            )}
             <Button onClick={() => router.push('/daily-review')} className="bg-accent hover:bg-accent/90">
                 <CalendarCheck className="mr-2 h-4 w-4" />
                 Proceed to Daily Review
