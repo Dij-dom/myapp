@@ -30,8 +30,6 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
-  const [isFinalized, setIsFinalized] = useState(false);
-
   const [existingTasks, setExistingTasks] = useState<FinalizedTask[]>([]);
   
   const [refinedTasks, setRefinedTasks] = useState<RefinedTask[]>(() => {
@@ -117,6 +115,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
               variant: "destructive"
           });
           router.push('/login');
+          setIsFinalizing(false);
           return;
       }
     
@@ -143,7 +142,7 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
           title: 'Plan Finalized!',
           description: 'Your daily plan has been saved.',
       });
-      setIsFinalized(true);
+      router.push('/dashboard');
 
     } catch (error) {
         toast({
@@ -249,17 +248,14 @@ export default function SuggestionReview({ initialData }: SuggestionReviewProps)
       )}
       {allReviewed && (
         <div className="mt-6 flex justify-center items-center gap-4">
-          {isFinalized ? (
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+          <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90" disabled={authLoading || isFinalizing}>
+            {isFinalizing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+            {isFinalizing ? 'Finalizing...' : 'Finalize My Plan'}
+          </Button>
+           <Button variant="outline" onClick={() => router.push('/dashboard')}>
               <Home className="mr-2 h-4 w-4" />
               View Dashboard
             </Button>
-          ) : (
-            <Button onClick={finalizePlan} size="lg" className="bg-accent hover:bg-accent/90" disabled={authLoading || isFinalizing}>
-              {isFinalizing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-              {isFinalizing ? 'Finalizing...' : 'Finalize My Plan'}
-            </Button>
-          )}
         </div>
       )}
     </div>
